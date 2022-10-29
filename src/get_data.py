@@ -143,18 +143,15 @@ class DataFromDB:
         Parsing rows from DB and returning list of unique tuples with etalons and list of tuples with data for answers
         """
         data_from_db = self.fetch_from_db(sys_id, date)
-        rows = []
         for row in data_from_db:
             try:
                 parent_pub_list = [int(pb) for pb in row["ParentPubList"].split(",") if pb != '']
-                rows.append(ROW(row["SysID"], row["ID"], row["Cluster"], row["ParentModuleID"],
-                                row["ParentID"], parent_pub_list, row["ChildBlockModuleID"],
-                                row["ChildBlockID"], row["ModuleID"]))
-
+                self.rows.append(ROW(row["SysID"], row["ID"], row["Cluster"], row["ParentModuleID"],
+                                     row["ParentID"], parent_pub_list, row["ChildBlockModuleID"],
+                                     row["ChildBlockID"], row["ModuleID"]))
             except ValueError as err:
                 logger.exception("Parsing {} with row: {}".format(err, str(row)))
-        self.rows = list(set(rows))
-        logger.info("Unique etalons tuples rows is {} for SysID {}".format(len(set(rows)), str(sys_id)))
+        logger.info("Unique etalons tuples rows quantity is {} for SysID {}".format(len(self.rows), str(sys_id)))
         return 0
 
 
@@ -162,8 +159,8 @@ def get_answers_from_statistic(LINK_SERVICE_URL, rows_from_db: [ROW], pubs_urls:
     """
     If test_mode is True only 10 Answers will be returned.
     """
-    answers_tpl = [ROW_FOR_ANSWERS(x.SysID, x.ID, x.ParentModuleID, x.ParentID,
-                                   x.ChildBlockModuleID, x.ChildBlockID) for x in rows_from_db]
+    answers_tpl = list(set([ROW_FOR_ANSWERS(x.SysID, x.ID, x.ParentModuleID, x.ParentID,
+                                            x.ChildBlockModuleID, x.ChildBlockID) for x in rows_from_db]))
     data_for_url = {
         "LINK_SERVICE_URL": LINK_SERVICE_URL,
         "pubs_urls": pubs_urls
@@ -179,8 +176,8 @@ def get_etalons_from_statistic(rows_from_db: [ROW], test_mode=False):
     Function, combine all entities for getting and creating etalons and answers from Statistic DB.
     If test_mode is True only 50 Answers will be returned.
     """
-    etalons_tpl = [(Query(row.ID, row.Cluster, str(uuid4()), row.SysID,
-                          row.ModuleID, row.ParentPubList)) for row in rows_from_db]
+    etalons_tpl = [Query(row.ID, row.Cluster, str(uuid4()), row.SysID,
+                         row.ModuleID, str(row.ParentPubList)) for row in rows_from_db]
     if test_mode:
         return tuples2etalons(etalons_tpl[:5000])
     else:
@@ -221,10 +218,11 @@ def upload_data_from_statistic(**kwargs):
     today = datetime.today().strftime('%Y-%m-%d')
     db_con = DataFromDB(**kwargs["db_credentials"])
     db_con.get_rows(kwargs["SysID"], today)
-    etalons_list = get_etalons_from_statistic(db_con.rows)
+    etalons_list = get_etalons_from_statistic(db_con.rows, test_mode=kwargs["test_mode"])
     answers_list = get_answers_from_statistic(kwargs["LINK_SERVICE_URL"],
                                               db_con.rows,
-                                              kwargs["pubs_urls"])
+                                              kwargs["pubs_urls"],
+                                              test_mode=kwargs["test_mode"])
 
     etalons_chunks = [x for x in chunks(etalons_list, 2000)]
     for etalons_chunk in etalons_chunks:

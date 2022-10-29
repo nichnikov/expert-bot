@@ -33,7 +33,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 logger = logging.getLogger("app")
 logger.setLevel(logging.INFO)
 
-app = FastAPI(title="ExpSuppBot")
+app = FastAPI(title="ExpertBot")
 tokenizer = TextsTokenizer()
 # spell_checker = SpellChecker(os.path.join(root, "data", "dicts"))
 
@@ -150,9 +150,10 @@ def add_data_from_source(item: str):
                                     "db_credentials": db_credentials,
                                     "etalons_add_url": etalons_add_url,
                                     "answer_add_url": answer_add_url,
+                                    "test_mode": True,
                                     "SysID": i}
             upload_data_from_statistic(**statistic_parameters)
-        return "OK"
+            return "OK"
 
 
 if __name__ == "__main__":

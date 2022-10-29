@@ -7,7 +7,7 @@ Query = namedtuple("Query", "templateId, etalonText, etalonId, SysID, moduleId, 
 FastAnswer = namedtuple("FastAnswer", "templateId, templateText, pubId")
 ROW_FOR_ANSWERS = namedtuple("ROW", "SysID, ID, ParentModuleID, ParentID, ChildBlockModuleID, ChildBlockID")
 
-ROW = namedtuple("ROW_2", "SysID, ID, Cluster, ParentModuleID, ParentID, ParentPubList, "
+ROW = namedtuple("ROW", "SysID, ID, Cluster, ParentModuleID, ParentID, ParentPubList, "
                           "ChildBlockModuleID, ChildBlockID, ModuleID")
 
 
