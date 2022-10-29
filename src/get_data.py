@@ -159,8 +159,8 @@ def get_answers_from_statistic(LINK_SERVICE_URL, rows_from_db: [ROW], pubs_urls:
     """
     If test_mode is True only 10 Answers will be returned.
     """
-    answers_tpl = list(set([ROW_FOR_ANSWERS(x.SysID, x.ID, x.ParentModuleID, x.ParentID,
-                                            x.ChildBlockModuleID, x.ChildBlockID) for x in rows_from_db]))
+    answers_tpl = sorted(list(set([ROW_FOR_ANSWERS(x.SysID, x.ID, x.ParentModuleID, x.ParentID,
+                                                   x.ChildBlockModuleID, x.ChildBlockID) for x in rows_from_db])))
     data_for_url = {
         "LINK_SERVICE_URL": LINK_SERVICE_URL,
         "pubs_urls": pubs_urls
